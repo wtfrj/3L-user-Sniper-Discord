@@ -40,7 +40,7 @@ Follow these steps to get the dashboard running on your local machine or hosting
 
 **1. Clone the repository**
 ```bash
-git clone https://github.com/yourusername/user-checker-with-dashboard.git
+git clone https://github.com/wtfrj/3L-user-Sniper-Discord.git
 cd user-checker-with-dashboard
 ```
 
