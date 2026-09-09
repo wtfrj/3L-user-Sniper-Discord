@@ -15,9 +15,12 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 app = Flask(__name__)
 
-PORT = 0000
-PASSWORD = "r1"
-app.secret_key = os.urandom(24)
+# --- RAILWAY MODIFICATIONS START ---
+PORT = int(os.environ.get("PORT", 5000))
+PASSWORD = os.environ.get("PASSWORD", "r1")
+app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
+# --- RAILWAY MODIFICATIONS END ---
+
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SECURE'] = False
@@ -626,19 +629,14 @@ def ping():
     return "pong"
 
 if __name__ == "__main__":
-    log("Fetching initial proxy list directly...")
-    init_proxies = fetch_free_proxies(use_proxy=None)
-    if init_proxies:
-        with proxy_lock:
-            proxy_list.extend(init_proxies)
-            random.shuffle(proxy_list)
-        log(f"✅ Loaded {len(proxy_list)} proxies.")
-    else:
-        log("⚠️ No proxies fetched. Will retry on demand.")
+    # Remove initial proxy fetch to prevent Railway deployment timeout issues.
+    log("Server initialized. Waiting for on-demand actions.")
     try:
         with open("/tmp/flask.pid", "w") as f:
             f.write(str(os.getpid()))
         print("PID written")
     except Exception as e:
         print(f"PID error: {e}")
+        
+    # --- RAILWAY HOST BINDING ---
     app.run(host='0.0.0.0', port=PORT, debug=False, use_reloader=False)
