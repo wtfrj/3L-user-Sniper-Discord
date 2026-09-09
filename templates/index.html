@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Discord Username Checker</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0d1117;
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            padding: 16px;
+        }
+        .container { max-width: 1600px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            color: #f0f6fc;
+        }
+        .logout-link {
+            color: #f85149;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .logout-link:hover { text-decoration: underline; }
+        .flex { display: flex; flex-wrap: wrap; gap: 16px; }
+        .col { flex: 1; min-width: 280px; }
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .card h2 {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #f0f6fc;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .stat-box {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 10px 12px;
+        }
+        .stat-box .label { font-size: 0.7rem; text-transform: uppercase; color: #8b949e; }
+        .stat-box .value { font-size: 1.6rem; font-weight: 600; margin-top: 2px; }
+        .stat-box.green .value { color: #2ea043; }
+        .stat-box.red .value { color: #f85149; }
+        .stat-box.yellow .value { color: #d29922; }
+        .control-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .control-group label { font-size: 0.85rem; color: #b0b8c4; }
+        .control-group input, .control-group select {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .control-group input[type="number"] { width: 60px; }
+        .control-group input[type="checkbox"] { width: auto; margin-right: 4px; }
+        .btn {
+            background: #30363d;
+            border: none;
+            color: #c9d1d9;
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .btn:hover { background: #3d444d; }
+        .btn.primary { background: #238636; color: #fff; }
+        .btn.primary:hover { background: #2ea043; }
+        .btn.danger { background: #da3633; color: #fff; }
+        .btn.danger:hover { background: #f85149; }
+        .btn.secondary { background: #1f6feb; color: #fff; }
+        .btn.secondary:hover { background: #388bfd; }
+        .btn-secondary { background: #30363d; color: #c9d1d9; }
+        .btn-secondary:hover { background: #3d444d; }
+        .btn-sm { padding: 2px 10px; font-size: 0.75rem; }
+        .log-area {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            padding: 8px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.75rem;
+            height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #b0b8c4;
+            line-height: 1.4;
+        }
+        .log-area::-webkit-scrollbar { width: 6px; }
+        .log-area::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+        .avail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .avail-table th { text-align: left; padding: 6px 8px; background: #0d1117; color: #8b949e; }
+        .avail-table td { padding: 4px 8px; border-bottom: 1px solid #21262d; }
+        .avail-table tr:hover td { background: #0d1117; }
+        .badge {
+            display: inline-block;
+            padding: 1px 10px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            background: #238636;
+            color: #fff;
+        }
+        .tabs {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #30363d;
+        }
+        .tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+            background: transparent;
+            color: #8b949e;
+        }
+        .tab.active {
+            background: #161b22;
+            color: #f0f6fc;
+            border-bottom: 2px solid #58a6ff;
+        }
+        .tab:hover { background: #21262d; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .file-link {
+            color: #58a6ff;
+            text-decoration: none;
+            margin-right: 12px;
+            font-size: 0.9rem;
+        }
+        .file-link:hover { text-decoration: underline; }
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+        .progress-container {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 8px;
+        }
+        .progress-bar-bg {
+            background: #21262d;
+            border-radius: 4px;
+            height: 20px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #238636, #2ea043);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: 0.85rem;
+            color: #b0b8c4;
+        }
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 90%;
+            max-height: 80%;
+            overflow: auto;
+            width: 700px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+        .modal-header h3 {
+            color: #f0f6fc;
+            font-weight: 400;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: #f85149;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .modal-close:hover { color: #fff; }
+        .modal-body {
+            white-space: pre-wrap;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #c9d1d9;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        @media (max-width: 700px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .control-group { flex-direction: column; align-items: stretch; }
+            .modal-content { width: 95%; padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🔍 Discord Username Checker</h1>
+        <a href="/logout" class="logout-link">🚪 Logout</a>
+    </div>
+
+    <div class="stats-grid" id="stats">
+        <div class="stat-box"><div class="label">Total</div><div class="value" id="total">0</div></div>
+        <div class="stat-box green"><div class="label">Available</div><div class="value" id="available">0</div></div>
+        <div class="stat-box red"><div class="label">Taken</div><div class="value" id="taken">0</div></div>
+        <div class="stat-box yellow"><div class="label">Unavailable</div><div class="value" id="unavailable">0</div></div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="random">Random Scan</div>
+        <div class="tab" data-tab="custom">Custom Search</div>
+        <div class="tab" data-tab="files">Files</div>
+    </div>
+
+    <div id="tab-random" class="tab-content active">
+        <div class="card">
+            <h2>⚙️ Settings</h2>
+            <div class="control-group">
+                <label>Threads</label>
+                <input type="number" id="threads" value="12" min="1" max="50">
+                <label>Min Proxies</label>
+                <input type="number" id="min_proxies" value="50" min="10" max="500">
+                <label>Timeout (s)</label>
+                <input type="number" id="timeout" value="4" min="2" max="30" step="0.5">
+                <label>Lengths</label>
+                <label><input type="checkbox" id="len3" checked> 3</label>
+                <label><input type="checkbox" id="len4" checked> 4</label>
+                <label><input type="checkbox" id="len5" checked> 5</label>
+            </div>
+            <div>
+                <button class="btn primary" id="startBtn">▶ Start</button>
+                <button class="btn danger" id="stopBtn">⏹ Stop</button>
+                <button class="btn-secondary" id="refreshLogsBtn">🔄 Refresh Logs</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>📊 Progress</h2>
+            <div class="progress-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progressInfo">0 / 0 (0%)</span>
+                    <span id="rateInfo">0.0 /min</span>
+                    <span id="etaInfo">ETA: --</span>
+                </div>
+            </div>
+        </div>
+        <div class="flex">
+            <div class="col">
+                <div class="card">
+                    <h2>📋 Available Usernames</h2>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table class="avail-table" id="availTable">
+                            <thead><tr><th>Username</th><th>Time</th></tr></thead>
+                            <tbody id="availBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <h2>📡 Live Logs</h2>
+                    <div class="log-area" id="logArea"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-custom" class="tab-content">
+        <div class="card">
+            <h2>🔎 Custom Search</h2>
+            <div class="control-group">
+                <label>Base username</label>
+                <input type="text" id="customBase" value="xric" style="width: 200px;">
+            </div>
+            <div class="control-group">
+                <label>Length(s)</label>
+                <label><input type="checkbox" class="custom-length" value="3"> 3</label>
+                <label><input type="checkbox" class="custom-length" value="4" checked> 4</label>
+                <label><input type="checkbox" class="custom-length" value="5"> 5</label>
+                <label><input type="checkbox" id="customAll" checked> All</label>
+            </div>
+            <div>
+                <button class="btn secondary" id="customStartBtn">▶ Search</button>
+                <button class="btn danger" id="customStopBtn">⏹ Stop</button>
+                <button class="btn-secondary" id="refreshCustomLogsBtn">🔄 Refresh Logs</button>
+            </div>
+            <p style="color:#8b949e; font-size:0.85rem; margin-top:8px;">Finds close matches using leetspeak, digits, underscores, and dots.</p>
+        </div>
+        <div class="flex">
+            <div class="col">
+                <div class="card">
+                    <h2>📋 Found Available</h2>
+                    <div id="customFound" style="font-size:1.2rem; color:#2ea043;">None yet</div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <h2>📡 Custom Logs</h2>
+                    <div class="log-area" id="customLogArea"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-files" class="tab-content">
+        <div class="card">
+            <h2>📁 Result Files</h2>
+            <div id="fileList"></div>
+            <button class="btn-secondary" id="refreshFilesBtn" style="margin-top:10px;">🔄 Refresh File List</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for viewing file content -->
+<div id="fileModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">File Content</h3>
+            <button class="modal-close" id="modalClose">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody">Loading...</div>
+    </div>
+</div>
+
+<script>
+console.log('Dashboard loaded');
+
+document.querySelectorAll('.tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+        document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+        this.classList.add('active');
+        var target = this.dataset.tab;
+        document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+        document.getElementById('tab-' + target).classList.add('active');
+    });
+});
+
+var customLengths = document.querySelectorAll('.custom-length');
+var customAll = document.getElementById('customAll');
+function updateCustomAll() {
+    var anyChecked = false;
+    customLengths.forEach(function(cb) { if (cb.checked) anyChecked = true; });
+    customAll.checked = !anyChecked;
+}
+customLengths.forEach(function(cb) { cb.addEventListener('change', updateCustomAll); });
+customAll.addEventListener('change', function() {
+    if (this.checked) customLengths.forEach(function(cb) { cb.checked = false; });
+    else customLengths.forEach(function(cb) { cb.checked = true; });
+});
+
+var lastCustomFound = null;
+
+function fetchStats() {
+    fetch('/api/stats', { credentials: 'include' })
+        .then(function(r) {
+            if (r.status === 401) { alert('Session expired'); window.location.href = '/login'; return; }
+            return r.json();
+        })
+        .then(function(data) {
+            if (!data) return;
+            document.getElementById('total').textContent = data.total;
+            document.getElementById('available').textContent = data.available;
+            document.getElementById('taken').textContent = data.taken;
+            document.getElementById('unavailable').textContent = data.unavailable;
+            var tbody = document.getElementById('availBody');
+            tbody.innerHTML = '';
+            data.available_list.forEach(function(item) {
+                var tr = document.createElement('tr');
+                tr.innerHTML = '<td><span class="badge">AVAIL</span> ' + item.username + '</td><td>' + item.timestamp + '</td>';
+                tbody.appendChild(tr);
+            });
+            if (data.available_list.length > 0) {
+                var latest = data.available_list[data.available_list.length - 1];
+                if (latest.username !== lastCustomFound) {
+                    lastCustomFound = latest.username;
+                    document.getElementById('customFound').textContent = latest.username + ' (found at ' + latest.timestamp + ')';
+                }
+            }
+        })
+        .catch(function(e) { console.error('fetchStats error', e); });
+}
+
+function fetchLogs() {
+    fetch('/api/logs', { credentials: 'include' })
+        .then(function(r) {
+            if (r.status === 401) { alert('Session expired'); window.location.href = '/login'; return; }
+            return r.json();
+        })
+        .then(function(data) {
+            if (!data) return;
+            var area = document.getElementById('logArea');
+            area.textContent = data.join('\n');
+            area.scrollTop = area.scrollHeight;
+        })
+        .catch(function(e) { console.error('fetchLogs error', e); });
+}
+
+function fetchCustomLogs() {
+    fetch('/api/logs', { credentials: 'include' })
+        .then(function(r) {
+            if (r.status === 401) { alert('Session expired'); window.location.href = '/login'; return; }
+            return r.json();
+        })
+        .then(function(data) {
+            if (!data) return;
+            var area = document.getElementById('customLogArea');
+            area.textContent = data.join('\n');
+            area.scrollTop = area.scrollHeight;
+        })
+        .catch(function(e) { console.error('fetchCustomLogs error', e); });
+}
+
+function fetchFiles() {
+    fetch('/api/files', { credentials: 'include' })
+        .then(function(r) {
+            if (r.status === 401) { alert('Session expired'); window.location.href = '/login'; return; }
+            return r.json();
+        })
+        .then(function(data) {
+            if (!data) return;
+            var container = document.getElementById('fileList');
+            container.innerHTML = '';
+            data.files.forEach(function(f) {
+                var wrapper = document.createElement('div');
+                wrapper.className = 'file-item';
+                var link = document.createElement('a');
+                link.href = '/download/' + f;
+                link.textContent = f;
+                link.className = 'file-link';
+                wrapper.appendChild(link);
+
+                var viewBtn = document.createElement('button');
+                viewBtn.textContent = '📄 View';
+                viewBtn.className = 'btn btn-secondary btn-sm';
+                viewBtn.onclick = function() { viewFile(f); };
+                wrapper.appendChild(viewBtn);
+
+                container.appendChild(wrapper);
+            });
+            if (data.files.length === 0) {
+                container.textContent = 'No result files found.';
+            }
+        })
+        .catch(function(e) { console.error('fetchFiles error', e); });
+}
+
+function viewFile(filename) {
+    document.getElementById('modalTitle').textContent = '📄 ' + filename;
+    document.getElementById('modalBody').textContent = 'Loading...';
+    document.getElementById('fileModal').style.display = 'flex';
+    fetch('/api/file/' + filename, { credentials: 'include' })
+        .then(function(r) {
+            if (r.status === 401) { alert('Session expired'); window.location.href = '/login'; return; }
+            return r.json();
+        })
+        .then(function(data) {
+            if (!data) return;
+            if (data.error) {
+                document.getElementById('modalBody').textContent = 'Error: ' + data.error;
+            } else {
+                document.getElementById('modalBody').textContent = data.content;
+            }
+        })
+        .catch(function(e) {
+            document.getElementById('modalBody').textContent = 'Failed to load file: ' + e;
+        });
+}
+
+document.getElementById('modalClose').addEventListener('click', function() {
+    document.getElementById('fileModal').style.display = 'none';
+});
+window.addEventListener('click', function(e) {
+    if (e.target === document.getElementById('fileModal')) {
+        document.getElementById('fileModal').style.display = 'none';
+    }
+});
+
+function fetchProgress() {
+    fetch('/api/progress', { credentials: 'include' })
+        .then(function(r) {
+            if (r.status === 401) { alert('Session expired'); window.location.href = '/login'; return; }
+            return r.json();
+        })
+        .then(function(data) {
+            if (!data) return;
+            var total = data.total_possible || 1;
+            var checked = data.checked;
+            var pct = Math.min(100, (checked / total) * 100);
+            document.getElementById('progressFill').style.width = pct + '%';
+            document.getElementById('progressInfo').textContent = checked + ' / ' + total + ' (' + pct.toFixed(1) + '%)';
+            document.getElementById('rateInfo').textContent = data.rate_per_min.toFixed(1) + ' /min';
+            var eta = data.eta_seconds;
+            if (eta > 0 && data.rate_per_min > 0) {
+                var h = Math.floor(eta / 3600);
+                var m = Math.floor((eta % 3600) / 60);
+                var s = Math.floor(eta % 60);
+                document.getElementById('etaInfo').textContent = 'ETA: ' + h + 'h ' + m + 'm ' + s + 's';
+            } else {
+                document.getElementById('etaInfo').textContent = 'ETA: --';
+            }
+        })
+        .catch(function(e) { console.error('fetchProgress error', e); });
+}
+
+function updateSettings() {
+    var payload = {
+        threads: parseInt(document.getElementById('threads').value) || 12,
+        min_proxies: parseInt(document.getElementById('min_proxies').value) || 50,
+        timeout: parseFloat(document.getElementById('timeout').value) || 4,
+        lengths: []
+    };
+    if (document.getElementById('len3').checked) payload.lengths.push(3);
+    if (document.getElementById('len4').checked) payload.lengths.push(4);
+    if (document.getElementById('len5').checked) payload.lengths.push(5);
+    return fetch('/api/settings', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload),
+        credentials: 'include'
+    });
+}
+
+document.getElementById('startBtn').addEventListener('click', function() {
+    console.log('Start button clicked');
+    updateSettings().then(function() {
+        fetch('/api/start/random', { method: 'POST', credentials: 'include' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) { alert('Started: ' + d.status); })
+            .catch(function(e) { alert('Error: ' + e); });
+    }).catch(function(e) { alert('Settings error: ' + e); });
+});
+
+document.getElementById('stopBtn').addEventListener('click', function() {
+    console.log('Stop button clicked');
+    fetch('/api/stop', { method: 'POST', credentials: 'include' })
+        .then(function(r) { return r.json(); })
+        .then(function(d) { alert('Stopped: ' + d.status); })
+        .catch(function(e) { alert('Error: ' + e); });
+});
+
+document.getElementById('customStartBtn').addEventListener('click', function() {
+    console.log('Custom Start clicked');
+    var base = document.getElementById('customBase').value.trim() || 'xric';
+    var lengths = [];
+    if (customAll.checked) {
+        // all lengths
+    } else {
+        customLengths.forEach(function(cb) { if (cb.checked) lengths.push(parseInt(cb.value)); });
+        if (lengths.length === 0) {
+            alert('Please select at least one length or check All.');
+            return;
+        }
+    }
+    document.getElementById('customFound').textContent = 'Searching...';
+    lastCustomFound = null;
+    updateSettings().then(function() {
+        fetch('/api/start/custom', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({base: base, lengths: lengths}),
+            credentials: 'include'
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) { alert('Custom started: ' + d.status); })
+        .catch(function(e) { alert('Error: ' + e); });
+    }).catch(function(e) { alert('Settings error: ' + e); });
+});
+
+document.getElementById('customStopBtn').addEventListener('click', function() {
+    console.log('Custom Stop clicked');
+    fetch('/api/stop', { method: 'POST', credentials: 'include' })
+        .then(function(r) { return r.json(); })
+        .then(function(d) { alert('Stopped: ' + d.status); })
+        .catch(function(e) { alert('Error: ' + e); });
+});
+
+document.getElementById('refreshLogsBtn').addEventListener('click', function() {
+    fetchLogs();
+    fetchProgress();
+    alert('Logs refreshed');
+});
+
+document.getElementById('refreshCustomLogsBtn').addEventListener('click', function() {
+    fetchCustomLogs();
+    alert('Custom logs refreshed');
+});
+
+document.getElementById('refreshFilesBtn').addEventListener('click', function() {
+    fetchFiles();
+    alert('Files refreshed');
+});
+
+fetchStats();
+fetchLogs();
+fetchCustomLogs();
+fetchFiles();
+fetchProgress();
+
+setInterval(fetchStats, 2000);
+setInterval(fetchProgress, 2000);
+setInterval(fetchLogs, 5000);
+setInterval(fetchCustomLogs, 5000);
+setInterval(fetchFiles, 5000);
+</script>
+</body>
+</html>
