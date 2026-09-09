@@ -15,8 +15,8 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 app = Flask(__name__)
 
-PORT = 24577
-PASSWORD = "x1"
+PORT = 0000
+PASSWORD = "r1"
 app.secret_key = os.urandom(24)
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_HTTPONLY'] = True
